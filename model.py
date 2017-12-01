@@ -225,6 +225,16 @@ class ChildSumTreeLSTM(nn.Module):
 
 
     def node_forward(self, inputs, child_c, child_h):
+        """
+
+        :param inputs: (1, 300)
+        :param child_c: (num_children, 1, mem_dim)
+        :param child_h: (num_children, 1, mem_dim)
+        :return: (tuple)
+        c: (1, mem_dim)
+        h: (1, mem_dim)
+        """
+
         child_h_sum = F.torch.sum(torch.squeeze(child_h,1),0)
 
         i = F.sigmoid(self.ix(inputs)+self.ih(child_h_sum))
@@ -235,16 +245,24 @@ class ChildSumTreeLSTM(nn.Module):
         fx = F.torch.unsqueeze(self.fx(inputs),1)
         f = F.torch.cat([self.fh(child_hi)+fx for child_hi in child_h], 0)
         f = F.sigmoid(f)
-        # removing extra singleton dimension
-        f = F.torch.unsqueeze(f,1)
+
+        # f = F.torch.unsqueeze(f,1) # comment to fix dimension missmatch
         fc = F.torch.squeeze(F.torch.mul(f,child_c),1)
 
         c = F.torch.mul(i,u) + F.torch.sum(fc,0)
         h = F.torch.mul(o, F.tanh(c))
 
-        return c,h
+        return c, h
 
     def forward(self, tree, embs, training = False):
+        """
+        Child sum tree LSTM forward function
+        :param tree:
+        :param embs: (sentence_length, 1, 300)
+        :param training:
+        :return:
+        """
+
         # add singleton dimension for future call to node_forward
         # embs = F.torch.unsqueeze(self.emb(inputs),1)
 
@@ -269,6 +287,13 @@ class ChildSumTreeLSTM(nn.Module):
         return tree.state, loss
 
     def get_child_states(self, tree):
+        """
+        Get c and h of all children
+        :param tree:
+        :return: (tuple)
+        child_c: (num_children, 1, mem_dim)
+        child_h: (num_children, 1, mem_dim)
+        """
         # add extra singleton dimension in middle...
         # because pytorch needs mini batches... :sad:
         if tree.num_children==0:
@@ -282,7 +307,9 @@ class ChildSumTreeLSTM(nn.Module):
             if self.cudaFlag:
                 child_c, child_h = child_c.cuda(), child_h.cuda()
             for idx in xrange(tree.num_children):
-                child_c[idx], child_h[idx] = tree.children[idx].state
+                child_c[idx] = tree.children[idx].state[0]
+                child_h[idx] = tree.children[idx].state[1]
+                # child_c[idx], child_h[idx] = tree.children[idx].state
         return child_c, child_h
 
 ##############################################################################
@@ -302,6 +329,13 @@ class SentimentModule(nn.Module):
             self.l1 = self.l1.cuda()
 
     def forward(self, vec, training = False):
+        """
+        Sentiment module forward function
+        :param vec: (1, mem_dim)
+        :param training:
+        :return:
+        (1, number_of_class)
+        """
         if self.dropout:
             out = self.logsoftmax(self.l1(F.dropout(vec, training = training)))
         else:
@@ -321,6 +355,13 @@ class TreeLSTMSentiment(nn.Module):
         self.tree_module.set_output_module(self.output_module)
 
     def forward(self, tree, inputs, training = False):
+        """
+        TreeLSTMSentiment forward function
+        :param tree:
+        :param inputs: (sentence_length, 1, 300)
+        :param training:
+        :return:
+        """
         tree_state, loss = self.tree_module(tree, inputs, training)
         output = tree.output
         return output, loss

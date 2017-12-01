@@ -144,7 +144,8 @@ def main():
         print('done creating emb, quit')
 
     if is_preprocessing_data:
-        print ('quit program')
+        print ('done preprocessing data, quit program to prevent memory leak')
+        print ('please run again')
         quit()
 
     # plug these into embedding matrix inside model
