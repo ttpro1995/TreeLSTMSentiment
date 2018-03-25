@@ -57,7 +57,7 @@ class SentimentTrainer(object):
         self.embedding_model.eval()
         loss = 0
         predictions = torch.zeros(len(dataset))
-        predictions = predictions
+        #predictions = predictions
         indices = torch.range(1,dataset.num_classes)
         for idx in tqdm(range(len(dataset)),desc='Testing epoch  '+str(self.epoch)+''):
             tree, sent, label = dataset[idx]
@@ -72,7 +72,8 @@ class SentimentTrainer(object):
             loss += err.data[0]
             output[:,1] = -9999 # no need middle (neutral) value
             val, pred = torch.max(output, 1)
-            predictions[idx] = int(pred.data.cpu()[0][0])
+            #predictions[idx] = pred.data.cpu()[0][0]
+            predictions[idx] = pred.data.cpu()[0]
             # predictions[idx] = torch.dot(indices,torch.exp(output.data.cpu()))
         return loss/len(dataset), predictions
 
