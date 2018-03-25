@@ -26,7 +26,7 @@ class SentimentTrainer(object):
         loss, k = 0.0, 0
         # torch.manual_seed(789)
         indices = torch.randperm(len(dataset))
-        for idx in tqdm(xrange(len(dataset)),desc='Training epoch '+str(self.epoch+1)+''):
+        for idx in tqdm(range(len(dataset)),desc='Training epoch '+str(self.epoch+1)+''):
             tree, sent, label = dataset[indices[idx]]
             input = Var(sent)
             target = Var(map_label_to_target_sentiment(label,dataset.num_classes, fine_grain=self.args.fine_grain))
@@ -59,7 +59,7 @@ class SentimentTrainer(object):
         predictions = torch.zeros(len(dataset))
         predictions = predictions
         indices = torch.range(1,dataset.num_classes)
-        for idx in tqdm(xrange(len(dataset)),desc='Testing epoch  '+str(self.epoch)+''):
+        for idx in tqdm(range(len(dataset)),desc='Testing epoch  '+str(self.epoch)+''):
             tree, sent, label = dataset[idx]
             input = Var(sent, volatile=True)
             target = Var(map_label_to_target_sentiment(label,dataset.num_classes, fine_grain=self.args.fine_grain), volatile=True)
@@ -72,7 +72,7 @@ class SentimentTrainer(object):
             loss += err.data[0]
             output[:,1] = -9999 # no need middle (neutral) value
             val, pred = torch.max(output, 1)
-            predictions[idx] = pred.data.cpu()[0][0]
+            predictions[idx] = int(pred.data.cpu()[0][0])
             # predictions[idx] = torch.dot(indices,torch.exp(output.data.cpu()))
         return loss/len(dataset), predictions
 
@@ -92,7 +92,7 @@ class Trainer(object):
         self.optimizer.zero_grad()
         loss, k = 0.0, 0
         indices = torch.randperm(len(dataset))
-        for idx in tqdm(xrange(len(dataset)),desc='Training epoch '+str(self.epoch+1)+''):
+        for idx in tqdm(range(len(dataset)),desc='Training epoch '+str(self.epoch+1)+''):
             ltree,lsent,rtree,rsent,label = dataset[indices[idx]]
             linput, rinput = Var(lsent), Var(rsent)
             target = Var(map_label_to_target(label,dataset.num_classes))
@@ -116,7 +116,7 @@ class Trainer(object):
         loss = 0
         predictions = torch.zeros(len(dataset))
         indices = torch.range(1,dataset.num_classes)
-        for idx in tqdm(xrange(len(dataset)),desc='Testing epoch  '+str(self.epoch)+''):
+        for idx in tqdm(range(len(dataset)),desc='Testing epoch  '+str(self.epoch)+''):
             ltree,lsent,rtree,rsent,label = dataset[idx]
             linput, rinput = Var(lsent, volatile=True), Var(rsent, volatile=True)
             target = Var(map_label_to_target(label,dataset.num_classes), volatile=True)

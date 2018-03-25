@@ -118,7 +118,7 @@ class SSTDataset(data.Dataset):
             self.trees = temp_trees
             self.sentences = temp_sentences
 
-        for i in xrange(0, len(self.trees)):
+        for i in range(0, len(self.trees)):
             self.labels.append(self.trees[i].gold_label)
         self.labels = torch.Tensor(self.labels) # let labels be tensor
         self.size = len(self.trees)
@@ -175,11 +175,14 @@ class SSTDataset(data.Dataset):
         # FIXED: tree.idx, also tree dict() use base 1 as it was in dataset
         # parents is list base 0, keep idx-1
         # labels is list base 0, keep idx-1
-        parents = map(int,line.split()) # split each number and turn to int
+        #parents = map(int,line.split()) # split each number and turn to int
+        parents = list(map(int,line.split())) # split each number and turn to int
         trees = dict() # this is dict
         root = None
-        labels = map(self.parse_dlabel_token, label_line.split())
-        for i in xrange(1,len(parents)+1):
+        #labels = map(self.parse_dlabel_token, label_line.split())
+        labels = list(map(self.parse_dlabel_token, label_line.split()))
+        for i in range(1,len(parents)+1):
+        #for i in range(1,len(list(parents))+1):
             #if not trees[i-1] and parents[i-1]!=-1:
             if i not in trees.keys() and parents[i-1]!=-1:
                 idx = i

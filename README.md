@@ -8,7 +8,7 @@ Networks](http://arxiv.org/abs/1503.00075).
 - [tqdm](https://github.com/tqdm/tqdm): display progress bar
 - [meowlogtool](https://pypi.python.org/pypi/meowlogtool): a logger that write everything on console to file
 - Java >= 8 (for Stanford CoreNLP utilities)
-- Python >= 2.7
+- Python >= 3
 
 ## Usage
 First run the script `./fetch_and_preprocess.sh`
